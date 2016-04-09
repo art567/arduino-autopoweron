@@ -9,6 +9,8 @@ This is very simple sketch program to push button after voltage being applied to
 
 I recommend to switch LOW/HIGH levels if you experience any troubles with double pushing.
 
+On my purpose I've switched LOW<->HIGH signal levels for Wintel W8 mini PC.
+
 If you wish to modify the code or add any additional features, please feel free to make a **fork** and submit a [pull request].
 
 
