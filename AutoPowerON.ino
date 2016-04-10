@@ -46,8 +46,8 @@ const int M2Pin = 5; // M2 pin number.
 // Variables :
 
 // Changeable OUT states :
-int M1State = LOW; // M1 pin init state.
-int M2State = LOW; // M2 pin init state.
+int M1State = HIGH; // M1 pin init state.
+int M2State = HIGH; // M2 pin init state.
 
 // Time counting variables :
 int h = 0;  // Hours
@@ -71,6 +71,8 @@ unsigned long M2_stage_ms = 0;
 
 // Serial conversation :
 char* SC = new char[1024]; // String buffer
+
+void calcTime();
 
 void setup() {
   // initialize serial communication at 9600 bits per second:
@@ -97,6 +99,128 @@ void setup() {
   digitalWrite(M2Pin, M2State);
 }
 
+void loop() {
+  // here is where you'd put code that needs to be running all the time.
+
+  unsigned long ms_current = millis();
+
+  if (ms_current - ms_prev >= c_1s_interval) {
+    sprintf(SC, "");
+    calcTime();
+
+    switch(M1_stage) {
+      case c_stage_init:
+        sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: INIT.\n", SC, h, m, s, ms);
+        M1State = HIGH;
+        digitalWrite(M1Pin, M1State);
+        sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = HIGH\n", SC, h, m, s, ms);
+        M1_stage = c_stage_wait;
+        M1_stage_ms = ms_current;
+        break;
+      case c_stage_wait:
+        if (ms_current - M1_stage_ms >= c_interval_init) {
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: WAIT.\n", SC, h, m, s, ms);
+          M1State = HIGH;
+          digitalWrite(M1Pin, M1State);
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = HIGH\n", SC, h, m, s, ms);
+          M1_stage = c_stage_push;
+          M1_stage_ms = ms_current;
+        }
+        break;
+      case c_stage_push:
+        if (ms_current - M1_stage_ms >= c_interval_wait) {
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: PUSH.\n", SC, h, m, s, ms);
+          M1State = LOW;
+          digitalWrite(M1Pin, M1State);
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = LOW\n", SC, h, m, s, ms);
+          M1_stage = c_stage_release;
+          M1_stage_ms = ms_current;
+        }
+        break;
+      case c_stage_release:
+        if (ms_current - M1_stage_ms >= c_interval_push1) {
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: RELEASE.\n", SC, h, m, s, ms);
+          M1State = HIGH;
+          digitalWrite(M1Pin, M1State);
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = HIGH\n", SC, h, m, s, ms);
+          M1_stage = c_stage_done;
+          M1_stage_ms = ms_current;
+        }
+        break;
+      case c_stage_done:
+        if (ms_current - M1_stage_ms >= c_interval_release) {
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: DONE.\n", SC, h, m, s, ms);
+          M1State = HIGH;
+          digitalWrite(M1Pin, M1State);
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = HIGH\n", SC, h, m, s, ms);
+          M1_stage = c_stage_exit;
+          M1_stage_ms = ms_current;
+        }
+        break;
+      default:
+        break;
+    }
+
+    switch(M2_stage) {
+      case c_stage_init:
+        sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: INIT.\n", SC, h, m, s, ms);
+        M2State = HIGH;
+        digitalWrite(M2Pin, M2State);
+        sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = HIGH\n", SC, h, m, s, ms);
+        M2_stage = c_stage_wait;
+        M2_stage_ms = ms_current;
+        break;
+      case c_stage_wait:
+        if (ms_current - M2_stage_ms >= c_interval_init) {
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: WAIT.\n", SC, h, m, s, ms);
+          M2State = HIGH;
+          digitalWrite(M2Pin, M2State);
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = HIGH\n", SC, h, m, s, ms);
+          M2_stage = c_stage_push;
+          M2_stage_ms = ms_current;
+        }
+        break;
+      case c_stage_push:
+        if (ms_current - M2_stage_ms >= c_interval_wait) {
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: PUSH.\n", SC, h, m, s, ms);
+          M2State = LOW;
+          digitalWrite(M2Pin, M2State);
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = LOW\n", SC, h, m, s, ms);
+          M2_stage = c_stage_release;
+          M2_stage_ms = ms_current;
+        }
+        break;
+      case c_stage_release:
+        if (ms_current - M2_stage_ms >= c_interval_push2) {
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: RELEASE.\n", SC, h, m, s, ms);
+          M2State = HIGH;
+          digitalWrite(M2Pin, M2State);
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = HIGH\n", SC, h, m, s, ms);
+          M2_stage = c_stage_done;
+          M2_stage_ms = ms_current;
+        }
+        break;
+      case c_stage_done:
+        if (ms_current - M2_stage_ms >= c_interval_release) {
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: DONE.\n", SC, h, m, s, ms);
+          M2State = HIGH;
+          digitalWrite(M2Pin, M2State);
+          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = HIGH\n", SC, h, m, s, ms);
+          M2_stage = c_stage_exit;
+          M2_stage_ms = ms_current;
+        }
+        break;
+      default:
+        break;
+    }
+    
+    ms_prev = ms_current;
+
+    // Write out console buffer
+    Serial.print(SC);
+  }
+}
+
 void calcTime() {
     // This variable will be used to store current time in milliseconds
     unsigned long ms_time = millis();
@@ -115,126 +239,4 @@ void calcTime() {
     ms_over = ms_over % 60000;
     s = round(ms_over / 1000);
     ms = round(ms_over % 1000);
-}
-
-void loop() {
-  // here is where you'd put code that needs to be running all the time.
-
-  unsigned long ms_current = millis();
-
-  if (ms_current - ms_prev >= c_1s_interval) {
-    sprintf(SC, "");
-    calcTime();
-
-    switch(M1_stage) {
-      case c_stage_init:
-        sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: INIT.\n", SC, h, m, s, ms);
-        M1State = LOW;
-        digitalWrite(M1Pin, M1State);
-        sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = LOW\n", SC, h, m, s, ms);
-        M1_stage = c_stage_wait;
-        M1_stage_ms = ms_current;
-        break;
-      case c_stage_wait:
-        if (ms_current - M1_stage_ms >= c_interval_init) {
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: WAIT.\n", SC, h, m, s, ms);
-          M1State = LOW;
-          digitalWrite(M1Pin, M1State);
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = LOW\n", SC, h, m, s, ms);
-          M1_stage = c_stage_push;
-          M1_stage_ms = ms_current;
-        }
-        break;
-      case c_stage_push:
-        if (ms_current - M1_stage_ms >= c_interval_wait) {
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: PUSH.\n", SC, h, m, s, ms);
-          M1State = HIGH;
-          digitalWrite(M1Pin, M1State);
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = HIGH\n", SC, h, m, s, ms);
-          M1_stage = c_stage_release;
-          M1_stage_ms = ms_current;
-        }
-        break;
-      case c_stage_release:
-        if (ms_current - M1_stage_ms >= c_interval_push1) {
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: RELEASE.\n", SC, h, m, s, ms);
-          M1State = LOW;
-          digitalWrite(M1Pin, M1State);
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = LOW\n", SC, h, m, s, ms);
-          M1_stage = c_stage_done;
-          M1_stage_ms = ms_current;
-        }
-        break;
-      case c_stage_done:
-        if (ms_current - M1_stage_ms >= c_interval_release) {
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1: DONE.\n", SC, h, m, s, ms);
-          M1State = LOW;
-          digitalWrite(M1Pin, M1State);
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M1 = LOW\n", SC, h, m, s, ms);
-          M1_stage = c_stage_exit;
-          M1_stage_ms = ms_current;
-        }
-        break;
-      default:
-        break;
-    }
-
-    switch(M2_stage) {
-      case c_stage_init:
-        sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: INIT.\n", SC, h, m, s, ms);
-        M2State = LOW;
-        digitalWrite(M2Pin, M2State);
-        sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = LOW\n", SC, h, m, s, ms);
-        M2_stage = c_stage_wait;
-        M2_stage_ms = ms_current;
-        break;
-      case c_stage_wait:
-        if (ms_current - M2_stage_ms >= c_interval_init) {
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: WAIT.\n", SC, h, m, s, ms);
-          M2State = LOW;
-          digitalWrite(M2Pin, M2State);
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = LOW\n", SC, h, m, s, ms);
-          M2_stage = c_stage_push;
-          M2_stage_ms = ms_current;
-        }
-        break;
-      case c_stage_push:
-        if (ms_current - M2_stage_ms >= c_interval_wait) {
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: PUSH.\n", SC, h, m, s, ms);
-          M2State = HIGH;
-          digitalWrite(M2Pin, M2State);
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = HIGH\n", SC, h, m, s, ms);
-          M2_stage = c_stage_release;
-          M2_stage_ms = ms_current;
-        }
-        break;
-      case c_stage_release:
-        if (ms_current - M2_stage_ms >= c_interval_push2) {
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: RELEASE.\n", SC, h, m, s, ms);
-          M2State = LOW;
-          digitalWrite(M2Pin, M2State);
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = LOW\n", SC, h, m, s, ms);
-          M2_stage = c_stage_done;
-          M2_stage_ms = ms_current;
-        }
-        break;
-      case c_stage_done:
-        if (ms_current - M2_stage_ms >= c_interval_release) {
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2: DONE.\n", SC, h, m, s, ms);
-          M2State = LOW;
-          digitalWrite(M2Pin, M2State);
-          sprintf(SC, "%s[%0.2d:%0.2d:%0.2d.%0.3d]: M2 = LOW\n", SC, h, m, s, ms);
-          M2_stage = c_stage_exit;
-          M2_stage_ms = ms_current;
-        }
-        break;
-      default:
-        break;
-    }
-    
-    ms_prev = ms_current;
-
-    // Write out console buffer
-    Serial.print(SC);
-  }
 }
