@@ -11,7 +11,7 @@ You can use these cheap boards and integrate it anywhere:
 
 **Arduino Nano**
 
-<img src="http://i.imgur.com/wduVzDN.jpg" width="250">
+<img src="http://i.imgur.com/AAedLVS.jpg" width="250">
 
 Nano - A compact board designed for breadboard use, the Nano connects to the computer using a USB Mini-B cable.
 
@@ -23,7 +23,7 @@ LilyPad - Designed for wearable application, this board can be sewn onto fabric,
 
 **Arduino Mini**
 
-<img src="http://i.imgur.com/AAedLVS.jpg" width="250">
+<img src="http://i.imgur.com/wduVzDN.jpg" width="250">
 
 Mini - This is the smallest Arduino board. It works well in a breadboard or for applications in which space is at a premium.
 
